@@ -29,11 +29,21 @@
 				<artifactId>mule-maven-plugin</artifactId>
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
+				<configuration>
+					<classifier>mule-application</classifier>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
+        <dependency>
+            <groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
+            <artifactId>referee-process-api</artifactId>
+            <version>1.0.2</version>
+            <classifier>raml</classifier>
+            <type>zip</type>
+        </dependency>
 		<dependency>
 			<groupId>org.mule.connectors</groupId>
 			<artifactId>mule-http-connector</artifactId>
@@ -45,13 +55,6 @@
 			<artifactId>mule-sockets-connector</artifactId>
 			<version>1.2.4</version>
 			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
-			<artifactId>referee-process-api</artifactId>
-			<version>1.0.0</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.mule.modules</groupId>
@@ -68,7 +71,7 @@
 		<dependency>
 			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
 			<artifactId>mule-plugin-race-data-system-api</artifactId>
-			<version>1.0.6</version>
+			<version>1.0.13</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
