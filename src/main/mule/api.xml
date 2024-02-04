@@ -125,5 +125,18 @@ output application/json
     </flow>
     <flow name="post:\challenges\timer\rest-api:application\json:referee-process-api-config">
 		<flow-ref doc:name="restApiChallenge" doc:id="f887be27-bc0a-4862-ac6a-b45423c6b437" name="restApiChallenge"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="4e89f626-e25f-469b-ade8-babc282dd872" type="SCOREKEEPER-SYSTEM-API:BAD_REQUEST" when="#[error.errorMessage.payload.error == 'non-compliant endpoint']">
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="250dc90f-be6b-4e44-86cf-80b4801e4207" variableName="httpStatus"/>
+				<ee:transform doc:name="error payload" doc:id="6e2089ce-4131-491f-8c55-506786fff695" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
     </flow>
 </mule>
