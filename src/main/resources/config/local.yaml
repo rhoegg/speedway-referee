@@ -1,0 +1,22 @@
+http:
+  port: "8092"
+  
+anypoint:
+  api:
+    id: "1"
+  app:
+    clientId: "xxxxx"
+    clientSecret: "yyyyy"
+
+racedata:
+  host: localhost
+  port: "8093"
+  protocol: HTTP
+  path: /api
+
+  
+scorekeeper:
+  host: localhost
+  port: "8094"
+  protocol: HTTP
+  path: /api

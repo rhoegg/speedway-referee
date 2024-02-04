@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
+http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="restApiChallenge" doc:id="c5cc7c45-c964-4706-ad50-3a58ec2e507e" >
+		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="3631310d-5cca-445a-ab8e-701fd8e72686" variableName="raceId"/>
+		<set-variable value="#[now()]" doc:name="raceStart" doc:id="e058193c-a518-4644-b27b-08c71cd0e123" variableName="raceStart"/>
+		<scorekeeper-system-api:time-rest-api doc:name="Time Rest API" doc:id="25af249e-a059-4bf0-b53f-91c916f9e2df" config-ref="scorekeeperSystemApiConfig" target="officialResult" />
+		<ee:transform doc:name="race" doc:id="986aa83d-5157-46f2-bb84-6fd01cdc2050" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	raceId: vars.raceId,
+	racerId: payload.racerId,
+	start: vars.raceStart,
+	time: vars.officialResult.time,
+	data: {
+		endpoint: payload.endpoint,
+		laps: payload.laps,
+		userRaceId: vars.officialResult.raceId
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<race-data-system-api:set-race doc:name="Set Race" doc:id="eb57030d-7858-4168-9ae1-06405e0ec00a" config-ref="raceDataSystemApiConfig" race-type="rest-api" id="#[vars.raceId]" target="setRaceResult"/>
+		<ee:transform doc:name="response" doc:id="bb676d55-e27d-47a0-ae4e-bba7be4a857c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	raceId: vars.raceId,
+	racerId: payload.racerId,
+	laps: payload.data.laps,
+	time: vars.officialResult.time
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="INFO" doc:id="2f8fb207-a66e-4e26-97e4-69f1b10a9466" message="Recorded official result for rest-api / racer #[payload.racerId]" category="referee.rest-api"/>
+	</sub-flow>
+</mule>

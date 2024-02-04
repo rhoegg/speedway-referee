@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<global-property doc:name="Global Property" doc:id="1e6eb864-0eec-4971-a225-d6313800c540" name="mule.env" value="local" />
+	<configuration-properties doc:name="Configuration properties" doc:id="6700edb1-de20-4efb-9b31-f4f338f0e61c" file="config/${mule.env}.yaml" />
+    <http:listener-config name="apiHttpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+	<race-data-system-api:config name="raceDataSystemApiConfig" doc:name="Race Data System API Config" doc:id="7021d3fa-5d5a-4727-82e9-5b22b547145e" property_host="${racedata.host}" property_port="${racedata.port}" property_basePath="${racedata.path}" property_protocol="${racedata.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
+	<scorekeeper-system-api:config name="scorekeeperSystemApiConfig" doc:name="Scorekeeper System API Config" doc:id="6d463e8a-e062-4f2f-be77-e7b2bfda6abd" property_host="${scorekeeper.host}" property_port="${scorekeeper.port}" property_basePath="${scorekeeper.path}" property_protocol="${scorekeeper.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
+	<api-gateway:autodiscovery apiId="${anypoint.api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="913a7dae-9fdf-4506-89b7-af034a1a84d0" flowRef="referee-process-api-main" />
+</mule>

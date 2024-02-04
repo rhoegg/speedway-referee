@@ -1,0 +1,19 @@
+http:
+  port: "8081"
+  
+anypoint:
+  api:
+    id: "TBD"
+
+racedata:
+  host: race-data-sapi
+  port: "8081"
+  protocol: HTTP
+  path: /api
+
+  
+scorekeeper:
+  host: scorekeeper-sapi
+  port: "8081"
+  protocol: HTTP
+  path: /api
