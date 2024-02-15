@@ -121,7 +121,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\challenges\timer\1brc:application\json:referee-process-api-config">
-		<set-variable value="501" doc:name="httpStatus = 501" doc:id="043252a5-9270-4b67-9a3b-a8aecc2e51c3" variableName="httpStatus"/>
+		<flow-ref doc:name="oneBillionRowChallenge" doc:id="b3029960-0a09-404c-84f5-39baee24450e" name="oneBillionRowChallenge"/>
     </flow>
     <flow name="post:\challenges\timer\rest-api:application\json:referee-process-api-config">
 		<flow-ref doc:name="restApiChallenge" doc:id="f887be27-bc0a-4862-ac6a-b45423c6b437" name="restApiChallenge"/>

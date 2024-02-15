@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd">
+	<sub-flow name="oneBillionRowChallenge" doc:id="8b62fe50-2806-4d53-8bbf-f128713fe468" >
+		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="fc04109e-51ff-4725-b2f4-a0eed910680b" variableName="raceId" />
+		<set-variable value="#[now()]" doc:name="raceStart" doc:id="2d406872-9f46-414d-a959-081a7ad51335" variableName="raceStart" />
+		<scorekeeper-system-api:time-temperature-averages doc:name="Time Temperature Averages" doc:id="7e7982c2-2c9e-4aca-a5b3-e8a9dfe19ad5" config-ref="scorekeeperSystemApiConfig" />
+	</sub-flow>
+</mule>
