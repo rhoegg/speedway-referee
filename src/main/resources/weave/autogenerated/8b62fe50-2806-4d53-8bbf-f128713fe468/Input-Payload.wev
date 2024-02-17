@@ -1,10 +1,9 @@
 %dw 2.0
 
 type auto_8b62fe50_2806_4d53_8bbf_f128713fe468_Input_Payload = {
-  raceId: String, 
+  endpoint: String, 
   racerId: String, 
-  count: Number, 
-  time: Number, 
+  count?: Number, 
   _?: Any
 }
 

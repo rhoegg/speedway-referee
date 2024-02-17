@@ -122,6 +122,19 @@ output application/json
     </flow>
     <flow name="post:\challenges\timer\1brc:application\json:referee-process-api-config">
 		<flow-ref doc:name="oneBillionRowChallenge" doc:id="b3029960-0a09-404c-84f5-39baee24450e" name="oneBillionRowChallenge"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="2d556fbe-881c-4161-8cb7-e153fe0f45ef" type="APP:BAD_REQUEST">
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="357716e9-c04b-4f2e-96d8-16069b38d390" variableName="httpStatus"/>
+				<ee:transform doc:name="error payload" doc:id="e3c7bc9f-5245-4c29-bc24-82badf79f61e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
     </flow>
     <flow name="post:\challenges\timer\rest-api:application\json:referee-process-api-config">
 		<flow-ref doc:name="restApiChallenge" doc:id="f887be27-bc0a-4862-ac6a-b45423c6b437" name="restApiChallenge"/>

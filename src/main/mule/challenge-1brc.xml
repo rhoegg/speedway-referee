@@ -1,12 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd">
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
+http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<sub-flow name="oneBillionRowChallenge" doc:id="8b62fe50-2806-4d53-8bbf-f128713fe468" >
+		<set-variable value="#[payload.racerId]" doc:name="racerId" doc:id="11815fab-0709-40ef-94fc-970c2147a392" variableName="racerId"/>
 		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="fc04109e-51ff-4725-b2f4-a0eed910680b" variableName="raceId" />
+		<set-variable value="#[payload.count]" doc:name="count" doc:id="4903a2b1-c10d-436c-9dc7-d0b267cc8a64" variableName="count"/>
 		<set-variable value="#[now()]" doc:name="raceStart" doc:id="2d406872-9f46-414d-a959-081a7ad51335" variableName="raceStart" />
-		<scorekeeper-system-api:time-temperature-averages doc:name="Time Temperature Averages" doc:id="7e7982c2-2c9e-4aca-a5b3-e8a9dfe19ad5" config-ref="scorekeeperSystemApiConfig" />
+		<try doc:name="Try" doc:id="8cf3c51e-5616-4522-aeb2-72c9d5a45a61" >
+			<scorekeeper-system-api:time-temperature-averages doc:name="Time Temperature Averages" doc:id="7e7982c2-2c9e-4aca-a5b3-e8a9dfe19ad5" config-ref="scorekeeperSystemApiConfig" >
+				<error-mapping sourceType="SCOREKEEPER-SYSTEM-API:BAD_REQUEST" targetType="APP:BAD_REQUEST" />
+			</scorekeeper-system-api:time-temperature-averages>
+			<logger level="DEBUG" doc:name="DEBUG" doc:id="4dddb78a-c119-486b-803d-cd5c64affd5b" message='#["racer $(vars.racerId) completed 1brc:$(vars.count) in $(payload.time)s"]' category="referee.challenge.1brc" />
+			<ee:transform doc:name="race data" doc:id="73b617a0-44e2-4d72-ba5a-be50d6cf3a62">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	raceId: payload.raceId,
+	racerId: payload.racerId,
+	start: vars.raceStart,
+	finish: now(),
+	time: payload.time,
+	data: {
+		count: vars.count
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<race-data-system-api:set-race doc:name="1brc" doc:id="c89db504-6aa5-4dea-ae54-0a936b5eaa4e" config-ref="raceDataSystemApiConfig" race-type="1brc" id="#[vars.raceId]" target="setRaceResult"/>
+			<ee:transform doc:name="response" doc:id="c96ccbe7-3dad-4fd3-96b4-3c4b8105baaa">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	raceId: payload.raceId,
+	racerId: payload.racerId,
+	count: vars.count,
+	time: payload.time
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		</try>
 	</sub-flow>
 </mule>
