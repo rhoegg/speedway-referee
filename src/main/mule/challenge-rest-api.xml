@@ -42,6 +42,6 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="INFO" doc:id="2f8fb207-a66e-4e26-97e4-69f1b10a9466" message="Recorded official result for rest-api / racer #[payload.racerId]" category="referee.rest-api"/>
+		<logger level="INFO" doc:name="INFO" doc:id="2f8fb207-a66e-4e26-97e4-69f1b10a9466" message='#[output text/plain --- "Recorded official result for rest-api / racer $(payload.racerId)"]' category="referee.rest-api"/>
 	</sub-flow>
 </mule>
