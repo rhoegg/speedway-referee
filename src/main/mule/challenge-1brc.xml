@@ -33,7 +33,14 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-			<race-data-system-api:set-race doc:name="1brc" doc:id="c89db504-6aa5-4dea-ae54-0a936b5eaa4e" config-ref="raceDataSystemApiConfig" race-type="1brc" id="#[vars.raceId]" target="setRaceResult"/>
+			<choice doc:name="Choice" doc:id="c668ba1a-0f0d-4881-9475-ebf6f6f40211">
+				<when expression='#[vars.mode == "official"]'>
+					<race-data-system-api:set-race doc:name="1brc" doc:id="c89db504-6aa5-4dea-ae54-0a936b5eaa4e" config-ref="raceDataSystemApiConfig" race-type="1brc" id="#[vars.raceId]" target="setRaceResult" />
+				</when>
+				<otherwise>
+					<race-data-system-api:set-race doc:name="1brc" doc:id="471b2f34-e53c-42bb-8841-57c9186e8c99" config-ref="raceDataSystemApiConfig" race-type="1brc" id="#[vars.raceId]" target="setRaceResult" expiry="${practice.expiry}"/>
+				</otherwise>
+			</choice>
 			<ee:transform doc:name="response" doc:id="c96ccbe7-3dad-4fd3-96b4-3c4b8105baaa">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0

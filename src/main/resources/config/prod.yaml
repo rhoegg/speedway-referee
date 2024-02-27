@@ -17,3 +17,6 @@ scorekeeper:
   port: "8081"
   protocol: HTTP
   path: /api
+  
+practice:
+  expiry: "86400" # seconds

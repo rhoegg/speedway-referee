@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
-    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:1.0.2:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:1.0.3:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="referee-process-api-main">
         <http:listener config-ref="apiHttpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -121,35 +121,64 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\challenges\timer\1brc:application\json:referee-process-api-config">
-		<flow-ref doc:name="oneBillionRowChallenge" doc:id="b3029960-0a09-404c-84f5-39baee24450e" name="oneBillionRowChallenge"/>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="2d556fbe-881c-4161-8cb7-e153fe0f45ef" type="APP:BAD_REQUEST">
-				<set-variable value="400" doc:name="httpStatus = 400" doc:id="357716e9-c04b-4f2e-96d8-16069b38d390" variableName="httpStatus"/>
-				<ee:transform doc:name="error payload" doc:id="e3c7bc9f-5245-4c29-bc24-82badf79f61e" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+        <set-variable value='#[attributes.queryParams.mode default "practice"]' doc:name="mode" doc:id="ab65de93-3d67-421d-bb58-5356341b428c" variableName="mode" />
+		<flow-ref doc:name="oneBillionRowChallenge" doc:id="b3029960-0a09-404c-84f5-39baee24450e" name="oneBillionRowChallenge" />
+		<error-handler>
+            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="2d556fbe-881c-4161-8cb7-e153fe0f45ef" type="APP:BAD_REQUEST">
+                <set-variable value="400" doc:name="httpStatus = 400" doc:id="357716e9-c04b-4f2e-96d8-16069b38d390" variableName="httpStatus" />
+                <ee:transform doc:name="error payload" doc:id="e3c7bc9f-5245-4c29-bc24-82badf79f61e">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 error.errorMessage.payload]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
     </flow>
     <flow name="post:\challenges\timer\rest-api:application\json:referee-process-api-config">
-		<flow-ref doc:name="restApiChallenge" doc:id="f887be27-bc0a-4862-ac6a-b45423c6b437" name="restApiChallenge"/>
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4e89f626-e25f-469b-ade8-babc282dd872" type="SCOREKEEPER-SYSTEM-API:BAD_REQUEST">
-				<set-variable value="400" doc:name="httpStatus = 400" doc:id="250dc90f-be6b-4e44-86cf-80b4801e4207" variableName="httpStatus"/>
-				<ee:transform doc:name="error payload" doc:id="6e2089ce-4131-491f-8c55-506786fff695" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+        <set-variable value='#[attributes.queryParams.mode default "practice"]' doc:name="mode" doc:id="44b26083-3b92-46b9-b734-a6878de2caa8" variableName="mode"/>
+		<flow-ref doc:name="restApiChallenge" doc:id="f887be27-bc0a-4862-ac6a-b45423c6b437" name="restApiChallenge" />
+        <error-handler>
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4e89f626-e25f-469b-ade8-babc282dd872" type="SCOREKEEPER-SYSTEM-API:BAD_REQUEST">
+                <set-variable value="400" doc:name="httpStatus = 400" doc:id="250dc90f-be6b-4e44-86cf-80b4801e4207" variableName="httpStatus" />
+                <ee:transform doc:name="error payload" doc:id="6e2089ce-4131-491f-8c55-506786fff695">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 error.errorMessage.payload]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-continue>
-		</error-handler>
+                    </ee:message>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+    <flow name="get:\health:referee-process-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"OK" as String {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\health\ready:referee-process-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  racedata: {
+    health: "OK"
+  },
+  scorekeeper: {
+    health: "OK"
+  }
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
     </flow>
 </mule>
