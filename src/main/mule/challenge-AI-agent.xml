@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
+	xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
+		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]"/>
+		<ee:transform doc:name="Transform Message" doc:id="a6755add-a1a3-4314-a38d-ff1b4b15a539" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint : payload.baseUri,
+	name: payload.name,
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig"/>
+		<logger level="INFO" doc:name="Logger" doc:id="dffc2cb6-4462-44f5-8c1e-23f5c53e8b69" message="Your Score is #[payload.score]"/>
+	</sub-flow>
+</mule>
