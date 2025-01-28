@@ -149,8 +149,7 @@ output application/json
         </ee:transform>
     </flow>
 	<flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
-		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="14fb28bd-9ea1-4b62-a33b-3e5a209381e9" config-ref="scorekeeperSystemApiConfig" />
-		<flow-ref doc:name="Flow Reference" doc:id="dbbb9ba7-90ae-420d-9e2f-fcb74c81ab96" name="startAIChallenge"/>
+		<flow-ref doc:name="startAIChallenge" doc:id="dbbb9ba7-90ae-420d-9e2f-fcb74c81ab96" name="startAIChallenge"/>
 		<logger level="INFO" message="#[payload]" />
     </flow>
 </mule>

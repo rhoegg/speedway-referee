@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org
 http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
-		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]"/>
+		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]"/>
 		<ee:transform doc:name="Transform Message" doc:id="a6755add-a1a3-4314-a38d-ff1b4b15a539" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
