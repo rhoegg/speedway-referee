@@ -148,21 +148,21 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
+	<flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
         <ee:transform doc:name="Transform Message" doc:id="a53fa2be-5e16-44c1-ac48-fe37535f7eee">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	"endpoint": payload[5],
+	"endpoint": payload,
 	"name": payload[4]
 	
 }
 ]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="14fb28bd-9ea1-4b62-a33b-3e5a209381e9" config-ref="scorekeeperSystemApiConfig"/>
+		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="14fb28bd-9ea1-4b62-a33b-3e5a209381e9" config-ref="scorekeeperSystemApiConfig" />
 		<logger level="INFO" message="#[payload]" />
     </flow>
 </mule>
