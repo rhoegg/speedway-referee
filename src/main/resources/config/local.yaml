@@ -4,6 +4,8 @@ http:
 anypoint:
   api:
     id: "1"
+    validation: "3"
+  
   app:
     clientId: "xxxxx"
     clientSecret: "yyyyy"
