@@ -151,7 +151,7 @@ output application/json
     </flow>
 	<flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
 		<flow-ref doc:name="startAIChallenge" doc:id="dbbb9ba7-90ae-420d-9e2f-fcb74c81ab96" name="startAIChallenge"/>
-		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="153af00f-9549-4d1c-bcf5-144b6a5386f1" config-ref="raceDataSystemApiConfig"/>
+		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="153af00f-9549-4d1c-bcf5-144b6a5386f1" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]"/>
 		<logger level="INFO" message="#[payload]" />
     </flow>
 </mule>

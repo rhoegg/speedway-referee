@@ -26,7 +26,7 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="dffc2cb6-4462-44f5-8c1e-23f5c53e8b69" message="Your Score is #[payload.score]"/>
 	</sub-flow>
 	<flow name="validateAINameChallenge" doc:id="7dec5d32-f851-4c0e-bc75-46fe751d2d71" >
-		<validation:is-number numberType="FLOAT" doc:name="Is number" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[payload.score]" minValue="4"/>
+		<validation:is-number numberType="FLOAT" doc:name="Is number" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[payload.score]" minValue="4" />
 		<ee:transform doc:name="Transform Message" doc:id="ef5be30c-1982-48e3-95c0-5ef5dec7ce5c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
