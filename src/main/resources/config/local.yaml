@@ -25,3 +25,9 @@ scorekeeper:
 
 practice:
   expiry: "3600" # seconds
+  
+  
+challenge:
+  aiagent:
+    speakname:
+      minScore: "4"
