@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
-	xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
+	xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
 http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
-		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]"/>
+		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="3bb5f7ee-ba66-459e-838a-f74913f4e6f9" variableName="raceEntry"/>
 		<ee:transform doc:name="Transform Message" doc:id="a6755add-a1a3-4314-a38d-ff1b4b15a539" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -20,6 +22,30 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig"/>
+		<flow-ref doc:name="validateAINameChallenge" doc:id="208f2f06-c410-4e8b-8a57-5e880b60b7d0" name="validateAINameChallenge"/>
 		<logger level="INFO" doc:name="Logger" doc:id="dffc2cb6-4462-44f5-8c1e-23f5c53e8b69" message="Your Score is #[payload.score]"/>
 	</sub-flow>
+	<flow name="validateAINameChallenge" doc:id="7dec5d32-f851-4c0e-bc75-46fe751d2d71" >
+		<validation:is-number numberType="FLOAT" doc:name="Is number" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[payload.score]" minValue="4" />
+		<ee:transform doc:name="Transform Message" doc:id="ef5be30c-1982-48e3-95c0-5ef5dec7ce5c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: vars[1].name,
+	racerId: vars[1].racerId,
+	score: payload.score,
+	baseUri: vars[1].baseUri,
+	lastUpdated: vars[1].updated
+		
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8b90d5c9-1b34-4154-9821-21021b735fc0" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ba064fc2-6231-459d-ba10-3904e4f81bd8" >
+			</on-error-propagate>
+		</error-handler>
+	</flow>
 </mule>
