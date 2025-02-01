@@ -149,6 +149,30 @@ output application/json
     </flow>
     <flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
         <flow-ref doc:name="startAIChallenge" doc:id="dbbb9ba7-90ae-420d-9e2f-fcb74c81ab96" name="startAIChallenge" />
-        <logger level="INFO" message="#[payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="25a403e1-abfe-4232-a261-8284669b85b6" type="APP:SCORE_TOO_LOW">
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="7392a479-eea2-445b-b0f0-685fe2ddad5d" category="referee.api.aiChallenge" message="error payload #[payload]"/>
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="e97c74ee-2c38-49d3-9407-ac0d25b66bca" message="error errorMessage payload #[error.errorMessage.payload]" category="referee.api.aiChallenge"/>
+				<ee:transform doc:name="Transform Message" doc:id="afdf9b5f-7e51-4cde-a3f0-bb338900261c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	racerId: vars.racer.racerId,
+	details: "Expected racer name to match $(vars.racer.name), but spoken racer name from API was $(vars.checkNameResult.transcribed default 'nothing')",
+	started: "",
+	error: "Spoken racer name does not match",
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
     </flow>
 </mule>

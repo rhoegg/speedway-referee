@@ -8,6 +8,7 @@ http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.o
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
+		<set-variable value="#[now()]" doc:name="started" doc:id="8c9c9fa6-5139-4319-92e4-5c49e22682fb" variableName="started"/>
 		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racer"/>
 		<ee:transform doc:name="Transform Message" doc:id="a6755add-a1a3-4314-a38d-ff1b4b15a539" >
 			<ee:message >
@@ -20,13 +21,13 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig" target="nameScore" targetValue="#[payload.score]"/>
-		<flow-ref doc:name="validateAINameChallenge" doc:id="208f2f06-c410-4e8b-8a57-5e880b60b7d0" name="validateAINameChallenge"/>
-		<logger level="INFO" doc:name="Logger" doc:id="dffc2cb6-4462-44f5-8c1e-23f5c53e8b69" message="Your Score is #[payload.score]"/>
-        <ee:transform doc:name="Transform" doc:id="pqjjze" >
+		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig" target="checkNameResult"/>
+		<validation:is-number numberType="FLOAT" doc:name="Check name score" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[vars.checkNameResult.score]" minValue="${challenge.aiagent.speakname.minScore}" message="#[&quot;The name similarity score $(vars.checkNameResult.score) is too low, must be at least $(p('challenge.aiagent.speakname.minScore')).&quot;]">
+			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:SCORE_TOO_LOW" />
+		</validation:is-number>
+        <ee:transform doc:name="race entry data" doc:id="pqjjze" >
         <ee:variables>
-            <ee:set-variable variableName="entry">
-                <![CDATA[%dw 2.0
+            <ee:set-variable variableName="entry"><![CDATA[%dw 2.0
 output application/json 
 ---
 {
@@ -35,10 +36,10 @@ output application/json
 		baseUri: payload.endpoint,
   	},
 	active: true,
-	started: now(),
+	started: vars.started,
 	status: {
 		nameCheck: {
-			score: vars.nameScore
+			score: vars.checkNameResult.score
 		}
 	}
 	
@@ -47,11 +48,18 @@ output application/json
         </ee:variables>
     </ee:transform>
 		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="12beed64-f137-4785-a85a-9c9b23c8ee3c" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" />
-	</sub-flow>
-	<sub-flow name="validateAINameChallenge" doc:id="91df9a29-1602-4796-beaa-a66318f394e9" >
-		<validation:is-number numberType="FLOAT" doc:name="Check nameScore" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[payload.score]" minValue="${challenge.aiagent.speakname.minScore}" >
-			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:SCORE_TOO_LOW" />
-		</validation:is-number>
-		<logger level="DEBUG" doc:name="Logger" doc:id="8b90d5c9-1b34-4154-9821-21021b735fc0" />
+		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	racerId: vars.racer.racerId,
+	details: "", // what should we return to the front end here?
+	started: vars.started,
+	entryId: "" // are we going to use this?
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</sub-flow>
 </mule>
