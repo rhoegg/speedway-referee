@@ -21,7 +21,10 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig" target="checkNameResult"/>
+		<scorekeeper-system-api:check-racer-name doc:name="Check Racer Name" doc:id="ad0ed6e3-5832-4433-a6bd-5c2cdceb54fe" config-ref="scorekeeperSystemApiConfig" target="checkNameResult">
+			<error-mapping sourceType="HTTP:GATEWAY_TIMEOUT" targetType="APP:RACER_TIMEOUT" />
+			<error-mapping sourceType="HTTP:BAD_GATEWAY" targetType="APP:UNREACHABLE_RACER_ENDPOINT" />
+		</scorekeeper-system-api:check-racer-name>
 		<validation:is-number numberType="FLOAT" doc:name="Check name score" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[vars.checkNameResult.score]" minValue="${challenge.aiagent.speakname.minScore}" message="#[&quot;The name similarity score $(vars.checkNameResult.score) is too low, must be at least $(p('challenge.aiagent.speakname.minScore')).&quot;]">
 			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:SCORE_TOO_LOW" />
 		</validation:is-number>
