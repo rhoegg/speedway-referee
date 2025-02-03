@@ -31,3 +31,4 @@ challenge:
   aiagent:
     speakname:
       minScore: "4"
+      timeout: "0.002"

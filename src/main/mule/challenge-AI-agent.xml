@@ -13,11 +13,13 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 		<ee:transform doc:name="Transform Message" doc:id="a6755add-a1a3-4314-a38d-ff1b4b15a539" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::Runtime
 output application/json
 ---
 {
 	endpoint : vars.racer.baseUri,
-	name: vars.racer.name
+	name: vars.racer.name,
+	timeout: p("challenge.aiagent.speakname.timeout") as Number
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
@@ -50,11 +52,13 @@ output application/json
             </ee:set-variable>
         </ee:variables>
     </ee:transform>
-		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="12beed64-f137-4785-a85a-9c9b23c8ee3c" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" />
+		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="12beed64-f137-4785-a85a-9c9b23c8ee3c" config-ref="raceDataSystemApiConfig" id="#[vars.racer.racerId]" >
+			<race-data-system-api:store-entry-request-data ><![CDATA[#[vars.entry]]]></race-data-system-api:store-entry-request-data>
+		</race-data-system-api:store-entry>
 		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 	racerId: vars.racer.racerId,
