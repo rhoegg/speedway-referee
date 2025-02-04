@@ -158,9 +158,9 @@ output application/json
 ---
 {
 	racerId: vars.racer.racerId,
-	details: "Expected racer name to match $(vars.racer.name), but spoken racer name from API was $(vars.checkNameResult.transcribed default 'nothing')",
+	details: "Expected racer name to match $(vars.racer.name), but spoken racer name from API was $(vars.checkNameResult.transcribed default 'nothing')\n$(error.description)",
 	started: vars.started,
-	error: "Spoken racer name does not match",
+	error: "Spoken racer name does not match"
 }]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>

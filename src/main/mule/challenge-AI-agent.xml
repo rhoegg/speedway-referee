@@ -27,7 +27,7 @@ output application/json
 			<error-mapping sourceType="HTTP:GATEWAY_TIMEOUT" targetType="APP:RACER_TIMEOUT" />
 			<error-mapping sourceType="HTTP:BAD_GATEWAY" targetType="APP:UNREACHABLE_RACER_ENDPOINT" />
 		</scorekeeper-system-api:check-racer-name>
-		<validation:is-number numberType="FLOAT" doc:name="Check name score" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[vars.checkNameResult.score]" minValue="${challenge.aiagent.speakname.minScore}" message="#[&quot;The name similarity score $(vars.checkNameResult.score) is too low, must be at least $(p('challenge.aiagent.speakname.minScore')).&quot;]">
+		<validation:is-number numberType="FLOAT" doc:name="Check name score" doc:id="36f3b7f9-36f8-41ff-a61a-aef371ba8a53" value="#[vars.checkNameResult.score]" minValue="${challenge.aiagent.speakname.minScore}" message="#[&quot;The name similarity score $(vars.checkNameResult.score)/10 is too low, must be at least $(p('challenge.aiagent.speakname.minScore'))/10.&quot;]">
 			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:SCORE_TOO_LOW" />
 		</validation:is-number>
         <ee:transform doc:name="race entry data" doc:id="pqjjze" >
@@ -62,7 +62,7 @@ output application/json
 ---
 {
 	racerId: vars.racer.racerId,
-	details: "", // what should we return to the front end here?
+	details: "successfully entered race", // what should we return to the front end here?
 	started: vars.started,
 	entryId: "" // are we going to use this?
 }]]></ee:set-payload>
