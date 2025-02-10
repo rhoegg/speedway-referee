@@ -14,9 +14,9 @@ racedata:
   
 scorekeeper:
   host: scorekeeper-sapi
-  port: "8081"
+  port: "443"
   protocol: HTTP
-  path: /api
+  path: /scorekeeper-sapi
   
 practice:
   expiry: "86400" # seconds

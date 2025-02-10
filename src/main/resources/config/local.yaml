@@ -19,9 +19,9 @@ racedata:
   
 scorekeeper:
   host: localhost
-  port: "8094"
+  port: "8081"
   protocol: HTTP
-  path: /api
+  path: /scorekeeper-sapi
 
 practice:
   expiry: "3600" # seconds
@@ -31,4 +31,4 @@ challenge:
   aiagent:
     speakname:
       minScore: "4"
-      timeout: "0.002"
+      timeout: "20"
