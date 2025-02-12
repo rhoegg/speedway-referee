@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
-    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:2.0.1:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:2.0.2:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="referee-process-api-main">
         <http:listener config-ref="apiHttpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -149,11 +149,11 @@ output application/json
     </flow>
     <flow name="post:\challenges\ai-agent:application\json:referee-process-api-config">
         <flow-ref doc:name="startAIChallenge" doc:id="dbbb9ba7-90ae-420d-9e2f-fcb74c81ab96" name="startAIChallenge" />
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5bc80416-d662-4542-b8bd-7b0e80d11148" type="APP:SCORE_TOO_LOW">
-				<ee:transform doc:name="500 and error response" doc:id="afdf9b5f-7e51-4cde-a3f0-bb338900261c">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
+        <error-handler>
+            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5bc80416-d662-4542-b8bd-7b0e80d11148" type="APP:SCORE_TOO_LOW">
+                <ee:transform doc:name="500 and error response" doc:id="afdf9b5f-7e51-4cde-a3f0-bb338900261c">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -162,19 +162,19 @@ output application/json
 	started: vars.started,
 	error: "Spoken racer name does not match"
 }]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-continue>
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="e400b81d-b8a6-4e59-80a9-239fb31554fe" type="APP:RACER_TIMEOUT">
-				<ee:transform doc:name="504 and error response" doc:id="cec61e45-a39f-48e1-be92-926b709d636d">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
+                    </ee:variables>
+                </ee:transform>
+            </on-error-continue>
+            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="e400b81d-b8a6-4e59-80a9-239fb31554fe" type="APP:RACER_TIMEOUT">
+                <ee:transform doc:name="504 and error response" doc:id="cec61e45-a39f-48e1-be92-926b709d636d">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -183,20 +183,20 @@ output application/json
 	error: error.errorMessage.payload.error,
 	details: error.errorMessage.payload.details,
 }]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 504]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<logger level="WARN" doc:name="WARN" doc:id="fed6243d-84e4-41da-b138-aaa90b4aff1c" message="Racer timed out: #[payload.error]" category="race.api.challenge.ai" />
-			</on-error-continue>
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="7c86a275-ef22-4b85-a827-e5d4fc647d23" type="APP:UNREACHABLE_RACER_ENDPOINT">
-				<ee:transform doc:name="502 and error response" doc:id="bd41533f-3e91-4286-b406-87f754f1d067" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:variables>
+                </ee:transform>
+                <logger level="WARN" doc:name="WARN" doc:id="fed6243d-84e4-41da-b138-aaa90b4aff1c" message="Racer timed out: #[payload.error]" category="race.api.challenge.ai" />
+            </on-error-continue>
+            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="7c86a275-ef22-4b85-a827-e5d4fc647d23" type="APP:UNREACHABLE_RACER_ENDPOINT">
+                <ee:transform doc:name="502 and error response" doc:id="bd41533f-3e91-4286-b406-87f754f1d067">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -205,16 +205,16 @@ output application/json
 	error: error.errorMessage.payload.error,
 	details: error.errorMessage.payload.details,
 }]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 502]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<logger level="WARN" doc:name="WARN" doc:id="ee8dc637-a749-463e-a4da-a232f2bbaeef" message="Unreachable racer endpoint: #[payload.error]" category="race.api.challenge.ai" />
-			</on-error-continue>
-		</error-handler>
+                    </ee:variables>
+                </ee:transform>
+                <logger level="WARN" doc:name="WARN" doc:id="ee8dc637-a749-463e-a4da-a232f2bbaeef" message="Unreachable racer endpoint: #[payload.error]" category="race.api.challenge.ai" />
+            </on-error-continue>
+        </error-handler>
     </flow>
 </mule>
