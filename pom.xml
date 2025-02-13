@@ -57,13 +57,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
-			<artifactId>referee-process-api</artifactId>
-			<version>2.0.2</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
 			<artifactId>mule-plugin-scorekeeper-system-api</artifactId>
 			<version>2.0.6</version>
 			<classifier>mule-plugin</classifier>
@@ -73,6 +66,13 @@
 			<artifactId>mule-plugin-race-data-system-api</artifactId>
 			<version>2.0.12</version>
 			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
+			<artifactId>referee-process-api</artifactId>
+			<version>2.0.3</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 	<repositories>
