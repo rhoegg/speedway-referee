@@ -55,6 +55,11 @@ output application/json
 		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="12beed64-f137-4785-a85a-9c9b23c8ee3c" config-ref="raceDataSystemApiConfig" id="#[vars.racer.racerId]" >
 			<race-data-system-api:store-entry-request-data ><![CDATA[#[vars.entry]]]></race-data-system-api:store-entry-request-data>
 		</race-data-system-api:store-entry>
+		<race-data-system-api:increase-score-for-entry doc:name="Increase score for entry" doc:id="587efb19-57bc-4049-9e8a-587104df34ad" config-ref="raceDataSystemApiConfig" id="#[vars.racer.racerId]">
+			<race-data-system-api:increase-score-for-entry-request-data ><![CDATA[#[{
+	name: 1
+}]]]></race-data-system-api:increase-score-for-entry-request-data>
+		</race-data-system-api:increase-score-for-entry>
 		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
