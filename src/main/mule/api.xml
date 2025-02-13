@@ -215,6 +215,22 @@ output application/java
                 </ee:transform>
                 <logger level="WARN" doc:name="WARN" doc:id="ee8dc637-a749-463e-a4da-a232f2bbaeef" message="Unreachable racer endpoint: #[payload.error]" category="race.api.challenge.ai" />
             </on-error-continue>
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="375daf9e-0ba8-47e7-8f72-f8a393615233" type="SCOREKEEPER-SYSTEM-API:INTERNAL_SERVER_ERROR">
+                <ee:transform doc:name="500 and error response" doc:id="3618eeb1-a2e7-454a-a82d-24343703f496">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-continue>
         </error-handler>
     </flow>
 </mule>
