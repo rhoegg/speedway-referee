@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
-    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:2.0.2:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="referee-process-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:referee-process-api:2.0.3:raml:zip:referee-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="referee-process-api-main">
         <http:listener config-ref="apiHttpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -214,6 +214,22 @@ output application/java
                     </ee:variables>
                 </ee:transform>
                 <logger level="WARN" doc:name="WARN" doc:id="ee8dc637-a749-463e-a4da-a232f2bbaeef" message="Unreachable racer endpoint: #[payload.error]" category="race.api.challenge.ai" />
+            </on-error-continue>
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="375daf9e-0ba8-47e7-8f72-f8a393615233" type="SCOREKEEPER-SYSTEM-API:INTERNAL_SERVER_ERROR">
+                <ee:transform doc:name="500 and error response" doc:id="3618eeb1-a2e7-454a-a82d-24343703f496">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
             </on-error-continue>
         </error-handler>
     </flow>
