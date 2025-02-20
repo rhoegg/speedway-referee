@@ -42,13 +42,7 @@ output application/json
 		baseUri: payload.endpoint,
   	},
 	active: true,
-	started: vars.started,
-	status: {
-		nameCheck: {
-			score: vars.checkNameResult.score
-		}
-	}
-	
+	started: vars.started,	
 }]]>
             </ee:set-variable>
         </ee:variables>
@@ -71,15 +65,14 @@ output application/json
 	details: "successfully entered race", // what should we return to the front end here?
 	started: vars.started,
 	score: payload.score,
-	entryId: "" // are we going to use this?
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</sub-flow>
-	<flow name="AIChallengetQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
-		<scheduler doc:name="Scheduler" doc:id="0848af5c-609f-4ec7-90c6-6cfbfd1c1767" >
+	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
+		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721" >
 			<scheduling-strategy >
-				<fixed-frequency timeUnit="MINUTES" frequency="5"/>
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
 			</scheduling-strategy>
 		</scheduler>
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
