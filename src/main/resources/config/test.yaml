@@ -15,8 +15,16 @@ racedata:
 scorekeeper:
   host: beyond-test.anypointspeedway.com
   port: "443"
-  protocol: HTTP
+  protocol: HTTPS
   path: /scorekeeper-sapi
   
 practice:
   expiry: "7200" # seconds
+
+challenge:
+  aiagent:
+    speakname:
+      minScore: "4"
+      timeout: "20"
+    question:
+      timeout: "20"

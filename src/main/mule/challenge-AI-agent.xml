@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api"
-	xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
 http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
 	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
 		<set-variable value="#[now()]" doc:name="started" doc:id="8c9c9fa6-5139-4319-92e4-5c49e22682fb" variableName="started"/>
 		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racer"/>
@@ -41,13 +42,7 @@ output application/json
 		baseUri: payload.endpoint,
   	},
 	active: true,
-	started: vars.started,
-	status: {
-		nameCheck: {
-			score: vars.checkNameResult.score
-		}
-	}
-	
+	started: vars.started,	
 }]]>
             </ee:set-variable>
         </ee:variables>
@@ -70,9 +65,58 @@ output application/json
 	details: "successfully entered race", // what should we return to the front end here?
 	started: vars.started,
 	score: payload.score,
-	entryId: "" // are we going to use this?
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</sub-flow>
+	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
+		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
+		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="1e125f08-ec6a-4d4e-9527-75c88b4a0261" config-ref="raceDataSystemApiConfig" active="true"/>
+		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="8b90bd4d-f87d-4da0-bd03-c118b8c5051b" >
+			<batch:process-records >
+				<batch:step name="getBaseUri" doc:id="9843dd93-cc10-4bc9-96d9-66ce30a6db03" >
+					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="5bbada8f-4b29-45ef-802f-e7a8c0ba763f" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry"/>
+					<ee:transform doc:name="Question Data" doc:id="a24101cb-3437-41a0-b96b-8bf7326181f4" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint: vars.racerEntry.baseUri,
+	question: vars.f1Question.question,
+	answer: vars.f1Question.answer,
+	timeout: p("challenge.aiagent.question.timeout") as Number
+	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="checkQuestion" doc:id="8b9b80e9-c58b-482a-9e1e-e9c55d20e87a" >
+					<scorekeeper-system-api:check-question doc:name="Check Question" doc:id="59f53f41-eb84-407d-9f1a-bfb5a41812f8" config-ref="scorekeeperSystemApiConfig">
+					</scorekeeper-system-api:check-question>
+					<ee:transform doc:name="Question Score" doc:id="52e774e1-e4d2-44e5-a89c-4e8016e462c5">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	question: payload.score
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="racerId"><![CDATA[payload.racerId]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="storeQuestionScore" doc:id="edb67ec7-b659-41b9-9a50-b452b179bd8d" acceptExpression="#[payload.question &gt; 0]" acceptPolicy="ALL">
+					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="6f45017d-3bbe-4744-a6da-af700729f06b" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]"/>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
 </mule>

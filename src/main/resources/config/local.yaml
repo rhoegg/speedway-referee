@@ -32,3 +32,5 @@ challenge:
     speakname:
       minScore: "4"
       timeout: "20"
+    question:
+      timeout: "60"
