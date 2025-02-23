@@ -63,8 +63,12 @@ output application/json
 {
 	racerId: vars.racer.racerId,
 	details: "successfully entered race", // what should we return to the front end here?
-	started: vars.started,
+	challengeScore: {
+			name: payload.challengeScore.name 	
+	},
 	score: payload.score,
+	started: vars.started,
+	
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
