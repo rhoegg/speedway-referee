@@ -76,7 +76,7 @@ output application/json
 	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
 		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1"/>
 			</scheduling-strategy>
 		</scheduler>
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
@@ -109,15 +109,16 @@ output application/json
 output application/json
 ---
 {
-	question: payload.score
+	question: payload.score * 2
 }]]></ee:set-payload>
 						</ee:message>
 						<ee:variables>
 							<ee:set-variable variableName="racerId"><![CDATA[payload.racerId]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="f81e59ca-fb65-46bb-a28e-82b6c17c4d3a" message='check question score is #[payload]'/>
 				</batch:step>
-				<batch:step name="storeQuestionScore" doc:id="edb67ec7-b659-41b9-9a50-b452b179bd8d" acceptExpression="#[payload.question &gt; 0]" acceptPolicy="ALL">
+				<batch:step name="storeQuestionScore" doc:id="edb67ec7-b659-41b9-9a50-b452b179bd8d" acceptExpression="#[payload.question &gt; 1]" acceptPolicy="ALL">
 					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="6f45017d-3bbe-4744-a6da-af700729f06b" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]"/>
 				</batch:step>
 			</batch:process-records>
