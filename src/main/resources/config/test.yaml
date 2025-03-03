@@ -27,4 +27,7 @@ challenge:
       minScore: "4"
       timeout: "20"
     question:
-      timeout: "20"
+      timeout: "30"
+    bias:
+      minScore: "100"
+      timeout: "60"
