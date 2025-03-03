@@ -74,11 +74,11 @@ output application/json
 		</ee:transform>
 	</sub-flow>
 	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
-		<!-- [STUDIO:"Scheduler"]<scheduler doc:name="Scheduler" doc:id="00faa9bb-b8a9-4cea-8f92-3c214db1b1ff" >
+		<scheduler doc:name="Scheduler" doc:id="00faa9bb-b8a9-4cea-8f92-3c214db1b1ff" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
 			</scheduling-strategy>
-		</scheduler> [STUDIO] -->
+		</scheduler>
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
 		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="1e125f08-ec6a-4d4e-9527-75c88b4a0261" config-ref="raceDataSystemApiConfig" active="true"/>
 		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="8b90bd4d-f87d-4da0-bd03-c118b8c5051b" >
@@ -127,16 +127,16 @@ output application/json
 	<flow name="challenge-AI-agentFlow" doc:id="775b6764-b577-494d-84da-5a8fbdb18bd8" >
 		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721">
 			<scheduling-strategy>
-				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1" />
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
 			</scheduling-strategy>
 		</scheduler>
 		<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article"/>
-		<logger level="INFO" doc:name="Logger" doc:id="ef4805f3-b3ca-46bf-80ab-2f4d98a9d3e0" message="payload going to batcj #[payload] and variables #[vars]"/>
 		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="99edabf3-751a-4d27-a071-cc3408705a83" config-ref="raceDataSystemApiConfig" active="true" />
-		<logger level="INFO" doc:name="Logger" doc:id="7d38a171-df32-4ff4-a7ae-81a7b8f73caf" />
+		<logger level="INFO" doc:name="Logger" doc:id="ef4805f3-b3ca-46bf-80ab-2f4d98a9d3e0" message="payload going to batcj #[payload] and variables #[vars]" />
 		<batch:job jobName="ChallengeBiasDetectionBatchJob" doc:id="fb32a4e7-18ce-47f2-ac4d-11bbd8ed03c9" >
 			<batch:process-records >
-				<batch:step name="getracerBaseUri" doc:id="df7ff2c5-da79-41f1-84e7-3a4217b7d3d1" >
+				<batch:step name="getracerinfo" doc:id="df7ff2c5-da79-41f1-84e7-3a4217b7d3d1" >
+					<race-data-system-api:get-entry doc:name="Get Entry" doc:id="403dafd4-e52f-4528-af55-fcd405e9c087" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="entryinfo"/>
 					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="3a9ad854-3e27-44d0-ab97-aabf8f92eb7f" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry" />
 					<ee:transform doc:name="Transform Message" doc:id="ef0bb0e8-1811-41e8-8396-f12d627f54ea" >
 						<ee:message >
@@ -146,13 +146,13 @@ output application/json
 {
 	endpoint: vars.racerEntry.baseUri,
 	articles: vars.article,
-	timeout: p("challenge.aiagent.question.timeout") as Number
+	timeout: p("challenge.aiagent.bias.timeout") as Number
 	
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
 				</batch:step>
-				<batch:step name="checkBias" doc:id="5d542457-279b-467d-906d-eda369ab60e4" >
+				<batch:step name="checkBias" doc:id="5d542457-279b-467d-906d-eda369ab60e4" acceptExpression='#[vars.entryinfo.challengeScore.question &gt; p("challenge.aiagent.bias.question.minScore") as Number]'>
 					<scorekeeper-system-api:check-article-bias-detection doc:name="Check Article Bias Detection" doc:id="1d8dc742-76bc-4def-9252-92148bc606d3" config-ref="scorekeeperSystemApiConfig"/>
 					<ee:transform doc:name="Bias Score" doc:id="a34152ba-7096-420e-a820-b539ce2c0df8" >
 						<ee:message >
@@ -175,6 +175,7 @@ var score = payload.score  match {
 				</batch:step>
 				<batch:step name="storeBiasScore" doc:id="6cfcbfd9-1b96-474c-a27a-2fb8745dda61" >
 					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="eddc2f17-055a-40ff-81bd-61869c6a0249" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]"/>
+					<logger level="INFO" doc:name="Logger" doc:id="09e144db-5d46-4afc-9b58-de9b1a966b06" message='#["successfully completed challenge"]'/>
 				</batch:step>
 			</batch:process-records>
 		</batch:job>
