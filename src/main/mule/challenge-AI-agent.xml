@@ -74,9 +74,9 @@ output application/json
 		</ee:transform>
 	</sub-flow>
 	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
-		<scheduler doc:name="Scheduler" doc:id="00faa9bb-b8a9-4cea-8f92-3c214db1b1ff" >
+		<scheduler doc:name="Scheduler" doc:id="0c0d7594-362f-4567-b8d8-7300ed5b27b2" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1"/>
 			</scheduling-strategy>
 		</scheduler>
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
@@ -127,7 +127,7 @@ output application/json
 	<flow name="challenge-AI-agentFlow" doc:id="775b6764-b577-494d-84da-5a8fbdb18bd8" >
 		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721">
 			<scheduling-strategy>
-				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="2"/>
 			</scheduling-strategy>
 		</scheduler>
 		<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article"/>
@@ -152,7 +152,7 @@ output application/json
 						</ee:message>
 					</ee:transform>
 				</batch:step>
-				<batch:step name="checkBias" doc:id="5d542457-279b-467d-906d-eda369ab60e4" acceptExpression='#[vars.entryinfo.challengeScore.question &gt; p("challenge.aiagent.bias.question.minScore") as Number]'>
+				<batch:step name="checkBias" doc:id="5d542457-279b-467d-906d-eda369ab60e4" acceptExpression='#[vars.entryinfo.challengeScore.question &gt; p("challenge.aiagent.bias.minScore") as Number]'>
 					<scorekeeper-system-api:check-article-bias-detection doc:name="Check Article Bias Detection" doc:id="1d8dc742-76bc-4def-9252-92148bc606d3" config-ref="scorekeeperSystemApiConfig"/>
 					<ee:transform doc:name="Bias Score" doc:id="a34152ba-7096-420e-a820-b539ce2c0df8" >
 						<ee:message >
@@ -160,6 +160,7 @@ output application/json
 output application/json
 
 var score = payload.score  match {
+	case 0 -> 0
     case 1 -> 5
     case 2 -> 10
     case 3 -> 20
