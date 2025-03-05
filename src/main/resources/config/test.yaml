@@ -17,9 +17,6 @@ scorekeeper:
   port: "443"
   protocol: HTTPS
   path: /scorekeeper-sapi
-  
-practice:
-  expiry: "7200" # seconds
 
 challenge:
   aiagent:

@@ -3,7 +3,7 @@ http:
   
 anypoint:
   api:
-    id: "19302987"
+    id: "20239189"
 
 racedata:
   host: race-data-sapi
@@ -13,9 +13,9 @@ racedata:
 
   
 scorekeeper:
-  host: scorekeeper-sapi
+  host: beyond-test.anypointspeedway.com
   port: "443"
-  protocol: HTTP
+  protocol: HTTPS
   path: /scorekeeper-sapi
   
 challenge:
