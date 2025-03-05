@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_e1ac6705_1868_4c8a_8266_7add42e68f16_Input_Payload = Array<{  racerId: String,   _?: Any}>
+

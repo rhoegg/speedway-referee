@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
+	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
+http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="questionBatchProcess" doc:id="609bd99b-f6e5-4f29-9696-13a31b39d275" >
+		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="1c46dd21-aab1-4a96-a229-febb6a34c08b" >
+			<batch:process-records >
+				<batch:step name="getBaseUri" doc:id="6633b964-68ac-4b95-a01e-34b9445cf9bb" >
+					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="fcc552f8-5642-4629-8279-49e819d17470" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry" />
+					<ee:transform doc:name="Question Data" doc:id="fa06ad68-7856-4622-95d6-c096e9eafe66" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint: vars.racerEntry.baseUri,
+	question: vars.f1Question.question,
+	answer: vars.f1Question.answer,
+	timeout: p("challenge.aiagent.question.timeout") as Number
+	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="8c3b893f-7ed7-4599-98ab-aa7c6f7a77e5" message="Checcking f1 question of #[vars.f1Question]"/>
+				</batch:step>
+				<batch:step name="checkQuestion" doc:id="8307240d-6fab-4bc3-9b4f-a6c217b92a73" >
+					<scorekeeper-system-api:check-question doc:name="Check Question" doc:id="4e95eaca-aa80-462b-9db4-360f40e3601b" config-ref="scorekeeperSystemApiConfig" />
+					<ee:transform doc:name="Question Score" doc:id="f950ada7-1f47-4880-8d27-ecbc7a9b6230" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	question: payload.score * 3
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="racerId" ><![CDATA[payload.racerId]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="28c273f6-d496-4746-a21d-5f657f740858" message="check question score is #[payload] for racer" />
+				</batch:step>
+				<batch:step name="storeQuestionScore" doc:id="0ad7daa2-aca1-4f7f-a28d-2cd98c9af8a6" acceptExpression="#[payload.question &gt; 1]" acceptPolicy="ALL" >
+					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="b7a69e26-6c1b-4414-af48-221d67b8430a" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]" />
+					<logger level="INFO" doc:name="Logger" doc:id="fd8597e6-1927-4afe-9671-5b76dcd157ba" message="Racer has completed question challenge"/>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
+	<flow name="biasBatchProcess" doc:id="e1ac6705-1868-4c8a-8266-7add42e68f16" >
+		<logger level="INFO" doc:name="Logger" doc:id="88803727-68cd-44cc-86fc-b9ed196144ae" message="payload going to batch #[payload] and variables #[vars]" />
+		<batch:job jobName="chellenges-batch-processingBatch_Job" doc:id="29cccb66-83db-435c-8f2d-4dc73b109cda" >
+			<batch:process-records >
+				<batch:step name="getRacerinfo" doc:id="02f4f87f-b7d3-4763-86b7-2fdec2c89579" >
+					<race-data-system-api:get-entry doc:name="Get Entry" doc:id="683cb5d2-a3f4-481d-a534-a54c887da24e" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="entryinfo" />
+					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="9c9dce3f-0556-4952-9452-0078f26d7431" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry" />
+					<ee:transform doc:name="Transform Message" doc:id="0b18f19d-0887-48ab-b6ed-3ec7d7027357" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint: vars.racerEntry.baseUri,
+	articles: vars.article,
+	timeout: p("challenge.aiagent.bias.timeout") as Number
+	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="checkBias" doc:id="649bd7bb-1016-4e43-bcf4-93c6dac3aea8" acceptExpression='#[vars.entryinfo.challengeScore.question &gt; p("challenge.aiagent.bias.minScore") as Number]' >
+					<scorekeeper-system-api:check-article-bias-detection doc:name="Check Article Bias Detection" doc:id="d3663687-e604-431b-95ca-be41055c9083" config-ref="scorekeeperSystemApiConfig" />
+					<ee:transform doc:name="Bias Score" doc:id="fee1fc57-7d59-4067-ac41-46992f3eab9d" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var score = payload.score  match {
+	case 0 -> 0
+    case 1 -> 5
+    case 2 -> 10
+    case 3 -> 20
+}
+
+---
+{
+	bias: score
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="cae369d0-d8d6-451c-919f-60fdfea9d286" message='#["Racer score is $(payload.bias) for bias challenge"]'/>
+				</batch:step>
+				<batch:step name="storeBiasScore" doc:id="cb7057d1-5270-4e04-b8f1-dcdc6c3500d6" acceptExpression="#[payload.bias &gt; 1]">
+					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="a1ac5526-00af-4fe0-b0fa-93d9b8538ea8" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]" />
+					<logger level="INFO" doc:name="Logger" doc:id="7ab07b38-e197-414e-86b8-9c65dbe39e44" message='#["Racer has successfully completed bias challenge"]' />
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
+</mule>
