@@ -43,7 +43,7 @@ output application/json
 							<ee:set-variable variableName="racerId" ><![CDATA[payload.racerId]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<logger level="INFO" doc:name="Logger" doc:id="28c273f6-d496-4746-a21d-5f657f740858" message="check question score is #[payload] for rracer" />
+					<logger level="INFO" doc:name="Logger" doc:id="28c273f6-d496-4746-a21d-5f657f740858" message="check question score is #[payload] for racer #vars.racerEntry.racerId]" />
 				</batch:step>
 				<batch:step name="storeQuestionScore" doc:id="0ad7daa2-aca1-4f7f-a28d-2cd98c9af8a6" acceptExpression="#[payload.question &gt; 1]" acceptPolicy="ALL" >
 					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="b7a69e26-6c1b-4414-af48-221d67b8430a" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]" />
