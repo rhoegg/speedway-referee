@@ -25,6 +25,7 @@ challenge:
       timeout: "20"
     question:
       timeout: "30"
+      runtime: "5"
     bias:
       minScore: "100"
       timeout: "60"

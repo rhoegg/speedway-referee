@@ -43,7 +43,7 @@ output application/json
 							<ee:set-variable variableName="racerId" ><![CDATA[payload.racerId]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<logger level="INFO" doc:name="Logger" doc:id="28c273f6-d496-4746-a21d-5f657f740858" message="check question score is #[payload] for racer #vars.racerEntry.racerId]" />
+					<logger level="INFO" doc:name="Logger" doc:id="28c273f6-d496-4746-a21d-5f657f740858" message="check question score is #[payload] for racer #[vars.racerEntry.racerId]" />
 				</batch:step>
 				<batch:step name="storeQuestionScore" doc:id="0ad7daa2-aca1-4f7f-a28d-2cd98c9af8a6" acceptExpression="#[payload.question &gt; 1]" acceptPolicy="ALL" >
 					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="b7a69e26-6c1b-4414-af48-221d67b8430a" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]" />
@@ -95,7 +95,7 @@ var score = payload.score  match {
 					</ee:transform>
 					<logger level="INFO" doc:name="Logger" doc:id="cae369d0-d8d6-451c-919f-60fdfea9d286" message='#["Racer score is $(payload.bias) for bias challenge"]'/>
 				</batch:step>
-				<batch:step name="storeBiasScore" doc:id="cb7057d1-5270-4e04-b8f1-dcdc6c3500d6" acceptExpression="#[payload.bias &gt; 1]">
+				<batch:step name="storeBiasScore" doc:id="cb7057d1-5270-4e04-b8f1-dcdc6c3500d6">
 					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="a1ac5526-00af-4fe0-b0fa-93d9b8538ea8" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]" />
 					<logger level="INFO" doc:name="Logger" doc:id="7ab07b38-e197-414e-86b8-9c65dbe39e44" message='#["Racer has successfully completed bias challenge"]' />
 				</batch:step>
