@@ -27,4 +27,5 @@ challenge:
       timeout: "30"
     bias:
       minScore: "100"
+      runtime: "60"
       timeout: "60"
