@@ -75,10 +75,6 @@ output application/json
 	</sub-flow>
 	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
 		<scheduler doc:name="Scheduler" doc:id="0c0d7594-362f-4567-b8d8-7300ed5b27b2" >
-			<scheduling-strategy >
-				<fixed-frequency timeUnit="MINUTES" startDelay="1" frequency='${challenge.aiagent.question.runtime}'/>
-			</scheduling-strategy>
-		</scheduler>
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
 		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="1e125f08-ec6a-4d4e-9527-75c88b4a0261" config-ref="raceDataSystemApiConfig" active="true"/>
 		<flow-ref doc:name="questionBatchProcess" doc:id="91d55769-e33a-494d-a492-01abc25d2742" name="questionBatchProcess"/>
@@ -100,5 +96,103 @@ output application/json
 				<flow-ref doc:name="questionBatchProcess" doc:id="0b5c53d2-0cac-41a9-aa75-65c11363dff6" name="biasBatchProcess"/>
 			</otherwise>
 		</choice>
+=======
+		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="8b90bd4d-f87d-4da0-bd03-c118b8c5051b" >
+			<batch:process-records >
+				<batch:step name="getBaseUri" doc:id="9843dd93-cc10-4bc9-96d9-66ce30a6db03" >
+					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="5bbada8f-4b29-45ef-802f-e7a8c0ba763f" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry"/>
+					<ee:transform doc:name="Question Data" doc:id="a24101cb-3437-41a0-b96b-8bf7326181f4" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint: vars.racerEntry.baseUri,
+	question: vars.f1Question.question,
+	answer: vars.f1Question.answer,
+	timeout: p("challenge.aiagent.question.timeout") as Number
+	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="checkQuestion" doc:id="8b9b80e9-c58b-482a-9e1e-e9c55d20e87a" >
+					<scorekeeper-system-api:check-question doc:name="Check Question" doc:id="59f53f41-eb84-407d-9f1a-bfb5a41812f8" config-ref="scorekeeperSystemApiConfig">
+					</scorekeeper-system-api:check-question>
+					<ee:transform doc:name="Question Score" doc:id="52e774e1-e4d2-44e5-a89c-4e8016e462c5">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	question: payload.score * 3
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="racerId"><![CDATA[payload.racerId]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="f81e59ca-fb65-46bb-a28e-82b6c17c4d3a" message='check question score is #[payload]'/>
+				</batch:step>
+				<batch:step name="storeQuestionScore" doc:id="edb67ec7-b659-41b9-9a50-b452b179bd8d" acceptExpression="#[payload.question &gt; 1]" acceptPolicy="ALL">
+					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="6f45017d-3bbe-4744-a6da-af700729f06b" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]"/>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
+	<flow name="challenge-AI-agentFlow" doc:id="775b6764-b577-494d-84da-5a8fbdb18bd8" >
+		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721">
+			<scheduling-strategy>
+				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1" />
+			</scheduling-strategy>
+		</scheduler>
+		<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ef4805f3-b3ca-46bf-80ab-2f4d98a9d3e0" message="payload going to batcj #[payload] and variables #[vars]"/>
+		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="99edabf3-751a-4d27-a071-cc3408705a83" config-ref="raceDataSystemApiConfig" active="true" />
+		<logger level="INFO" doc:name="Logger" doc:id="7d38a171-df32-4ff4-a7ae-81a7b8f73caf" />
+		<batch:job jobName="ChallengeBiasDetectionBatchJob" doc:id="fb32a4e7-18ce-47f2-ac4d-11bbd8ed03c9" >
+			<batch:process-records >
+				<batch:step name="getracerBaseUri" doc:id="df7ff2c5-da79-41f1-84e7-3a4217b7d3d1" >
+					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="3a9ad854-3e27-44d0-ab97-aabf8f92eb7f" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry" />
+					<ee:transform doc:name="Transform Message" doc:id="ef0bb0e8-1811-41e8-8396-f12d627f54ea" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	endpoint: vars.racerEntry.baseUri,
+	articles: vars.article,
+	timeout: p("challenge.aiagent.question.timeout") as Number
+	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="checkBias" doc:id="5d542457-279b-467d-906d-eda369ab60e4" >
+					<scorekeeper-system-api:check-article-bias-detection doc:name="Check Article Bias Detection" doc:id="1d8dc742-76bc-4def-9252-92148bc606d3" config-ref="scorekeeperSystemApiConfig"/>
+					<ee:transform doc:name="Bias Score" doc:id="a34152ba-7096-420e-a820-b539ce2c0df8" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var score = payload.score  match {
+    case 1 -> 5
+    case 2 -> 10
+    case 3 -> 20
+}
+
+---
+{
+	bias: score
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="8618498a-3a52-4ae0-85d1-fcd512842710" />
+				</batch:step>
+				<batch:step name="storeBiasScore" doc:id="6cfcbfd9-1b96-474c-a27a-2fb8745dda61" >
+					<race-data-system-api:increase-score-for-entry doc:name="Increase Score for Entry" doc:id="eddc2f17-055a-40ff-81bd-61869c6a0249" config-ref="raceDataSystemApiConfig" id="#[vars.racerEntry.racerId]"/>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
 	</flow>
 </mule>
