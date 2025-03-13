@@ -3,7 +3,7 @@ http:
   
 anypoint:
   api:
-    id: "19302987"
+    id: "20239189"
 
 racedata:
   host: race-data-sapi
@@ -13,10 +13,18 @@ racedata:
 
   
 scorekeeper:
-  host: scorekeeper-sapi
+  host: beyond.anypointspeedway.com
   port: "443"
-  protocol: HTTP
+  protocol: HTTPS
   path: /scorekeeper-sapi
   
-practice:
-  expiry: "86400" # seconds
+challenge:
+  aiagent:
+    speakname:
+      minScore: "4"
+      timeout: "20"
+    question:
+      timeout: "30"
+    bias:
+      minScore: "100"
+      timeout: "60"

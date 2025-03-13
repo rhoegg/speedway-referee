@@ -74,13 +74,29 @@ output application/json
 		</ee:transform>
 	</sub-flow>
 	<flow name="AIChallengeQuestion" doc:id="294fa81a-a2fb-428e-a950-882d170fd129" >
-		<!-- [STUDIO:"Scheduler"]<scheduler doc:name="Scheduler" doc:id="00faa9bb-b8a9-4cea-8f92-3c214db1b1ff" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
-			</scheduling-strategy>
-		</scheduler> [STUDIO] -->
+		<scheduler doc:name="Scheduler" doc:id="0c0d7594-362f-4567-b8d8-7300ed5b27b2" >
 		<scorekeeper-system-api:generate-formula-one-question doc:name="Generate Formula One Question" doc:id="0753fbb0-f523-4cb4-a78d-91fecc2af741" config-ref="scorekeeperSystemApiConfig" target="f1Question"/>
 		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="1e125f08-ec6a-4d4e-9527-75c88b4a0261" config-ref="raceDataSystemApiConfig" active="true"/>
+		<flow-ref doc:name="questionBatchProcess" doc:id="91d55769-e33a-494d-a492-01abc25d2742" name="questionBatchProcess"/>
+	</flow>
+	<flow name="AIBiasChallenge" doc:id="775b6764-b577-494d-84da-5a8fbdb18bd8" >
+		<scheduler doc:name="Scheduler" doc:id="087d0e58-04b1-45ad-a36e-5aa0ebb5b721">
+			<scheduling-strategy>
+				<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1"/>
+			</scheduling-strategy>
+		</scheduler>
+		<race-data-system-api:search-entries doc:name="Search Entries" doc:id="99edabf3-751a-4d27-a071-cc3408705a83" config-ref="raceDataSystemApiConfig" active="true" />
+		<choice doc:name="Choice" doc:id="f79f969f-60ff-442c-ba11-4e96ed77f3e8" >
+			<when expression="#[isEmpty(payload)]">
+				<logger level="INFO" doc:name="Logger" doc:id="b50754c1-e2ac-4f2f-8ac4-e4095d68a6b5" message='#["No racers found to run bias challenge"]'/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="97671079-71dc-4707-bd2c-c9a53d1e332a" message='#["There are $(sizeOf(payload)) racers available for bias challenge"]'/>
+				<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article" />
+				<flow-ref doc:name="questionBatchProcess" doc:id="0b5c53d2-0cac-41a9-aa75-65c11363dff6" name="biasBatchProcess"/>
+			</otherwise>
+		</choice>
+=======
 		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="8b90bd4d-f87d-4da0-bd03-c118b8c5051b" >
 			<batch:process-records >
 				<batch:step name="getBaseUri" doc:id="9843dd93-cc10-4bc9-96d9-66ce30a6db03" >

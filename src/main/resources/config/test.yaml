@@ -3,7 +3,7 @@ http:
   
 anypoint:
   api:
-    id: "19278516"
+    id: "20197058"
 
 racedata:
   host: race-data-sapi
@@ -17,9 +17,6 @@ scorekeeper:
   port: "443"
   protocol: HTTPS
   path: /scorekeeper-sapi
-  
-practice:
-  expiry: "7200" # seconds
 
 challenge:
   aiagent:
@@ -27,4 +24,7 @@ challenge:
       minScore: "4"
       timeout: "20"
     question:
-      timeout: "20"
+      timeout: "30"
+    bias:
+      minScore: "100"
+      timeout: "60"
