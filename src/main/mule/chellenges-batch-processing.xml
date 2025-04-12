@@ -55,7 +55,7 @@ output application/json
 		<batch:job jobName="AIChallengeQuestionBatchJob" doc:id="1c46dd21-aab1-4a96-a229-febb6a34c08b" maxFailedRecords="-1">
 			<batch:process-records >
 				<batch:step name="getBaseUri" doc:id="6633b964-68ac-4b95-a01e-34b9445cf9bb" >
-					<race-data-system-api:get-entry doc:name="Get Entry" doc:id="727da6fb-7ccc-4a1b-8917-be54340c6592" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]"/>
+					<race-data-system-api:get-entry doc:name="Get Entry" doc:id="727da6fb-7ccc-4a1b-8917-be54340c6592" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="entryinfo"/>
 					<race-data-system-api:get-racer doc:name="Get Racer" doc:id="fcc552f8-5642-4629-8279-49e819d17470" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racerEntry" />
 					<ee:transform doc:name="Question Data" doc:id="fa06ad68-7856-4622-95d6-c096e9eafe66" >
 						<ee:message >
