@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/ba
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="biasBatchProcess" doc:id="e1ac6705-1868-4c8a-8266-7add42e68f16">
 		<logger level="INFO" doc:name="Logger" doc:id="88803727-68cd-44cc-86fc-b9ed196144ae" message="payload going to batch #[payload] and variables #[vars]" />
-		<batch:job jobName="chellenges-batch-processingBatch_Job" doc:id="29cccb66-83db-435c-8f2d-4dc73b109cda" maxFailedRecords="-1">
+		<batch:job jobName="challenges-batch-processingBatch_Job" doc:id="29cccb66-83db-435c-8f2d-4dc73b109cda" maxFailedRecords="-1">
 			<batch:process-records>
 				<batch:step name="getRacerinfo" doc:id="02f4f87f-b7d3-4763-86b7-2fdec2c89579">
 					<race-data-system-api:get-entry doc:name="Get Entry" doc:id="683cb5d2-a3f4-481d-a534-a54c887da24e" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="entryinfo" />
