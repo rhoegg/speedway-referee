@@ -23,6 +23,13 @@ scorekeeper:
   protocol: HTTP
   path: /scorekeeper-sapi
 
+racerdata:
+  host: localhost
+  port: "8081"
+  protocol: HTTP
+  path: /racerdata-sapi
+
+
 practice:
   expiry: "3600" # seconds
   
