@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:racer-data-system-api="http://www.mulesoft.org/schema/mule/racer-data-system-api" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:scorekeeper-system-api="http://www.mulesoft.org/schema/mule/scorekeeper-system-api" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
 http://www.mulesoft.org/schema/mule/scorekeeper-system-api http://www.mulesoft.org/schema/mule/scorekeeper-system-api/current/mule-scorekeeper-system-api.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
-http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/racer-data-system-api http://www.mulesoft.org/schema/mule/racer-data-system-api/current/mule-racer-data-system-api.xsd">
 	<sub-flow name="startAIChallenge" doc:id="58bbdf97-aa89-480d-b0b8-d5ce2dd60c5f" >
 		<set-variable value="#[now()]" doc:name="started" doc:id="8c9c9fa6-5139-4319-92e4-5c49e22682fb" variableName="started"/>
 		<race-data-system-api:get-racer doc:name="Get Racer" doc:id="54221545-fccf-4bc9-8eb4-38150e3844af" config-ref="raceDataSystemApiConfig" id="#[payload.racerId]" target="racer"/>
@@ -55,6 +56,7 @@ output application/json
 	name: 1
 }]]]></race-data-system-api:increase-score-for-entry-request-data>
 		</race-data-system-api:increase-score-for-entry>
+		<racer-data-system-api:update-racer doc:name="Update Racer" doc:id="63a65c4a-3513-41a1-ad1e-56221b2255a4" config-ref="Racer_Data_System_API_Config" id="#[vars.racer.racerId]"/>
 		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
