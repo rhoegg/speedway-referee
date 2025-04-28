@@ -56,7 +56,11 @@ output application/json
 	name: 1
 }]]]></race-data-system-api:increase-score-for-entry-request-data>
 		</race-data-system-api:increase-score-for-entry>
-		<racer-data-system-api:update-racer doc:name="Update Racer" doc:id="63a65c4a-3513-41a1-ad1e-56221b2255a4" config-ref="Racer_Data_System_API_Config" id="#[vars.racer.racerId]"/>
+		<racer-data-system-api:update-challenge-start-date doc:name="Update challenge start date" doc:id="9b4e56e9-023c-49f3-aa37-86aeeb48932c" config-ref="Racer_Data_System_API_Config" sc-name="#[vars.entry.racer.name]" target="dateUpdate">
+			<racer-data-system-api:update-challenge-start-date-request-data ><![CDATA[#[{
+	name: now() as String {format: "y-MM-dd"}
+}]]]></racer-data-system-api:update-challenge-start-date-request-data>
+		</racer-data-system-api:update-challenge-start-date>
 		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
