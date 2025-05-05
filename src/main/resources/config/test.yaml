@@ -11,6 +11,11 @@ racedata:
   protocol: HTTP
   path: /api
 
+racerdata:
+  host: beyond-test.anypointspeedway.com
+  port: "443"
+  protocol: HTTP
+  path: /racerdata-sapi
   
 scorekeeper:
   host: beyond-test.anypointspeedway.com
