@@ -58,7 +58,7 @@ output application/json
 		</race-data-system-api:increase-score-for-entry>
 		<racer-data-system-api:update-challenge-start-date doc:name="Update challenge start date" doc:id="9b4e56e9-023c-49f3-aa37-86aeeb48932c" config-ref="Racer_Data_System_API_Config" sc-name="#[vars.entry.racer.name]" target="dateUpdate">
 			<racer-data-system-api:update-challenge-start-date-request-data ><![CDATA[#[{
-	name: now() as String {format: "y-MM-dd"}
+	name: now() as String {format: "yyyy-MM-dd"}
 }]]]></racer-data-system-api:update-challenge-start-date-request-data>
 		</racer-data-system-api:update-challenge-start-date>
 		<ee:transform doc:name="Transform Message" doc:id="7237991d-5d94-49fe-9956-7024bea98e35" >
@@ -102,8 +102,15 @@ output application/json
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Logger" doc:id="97671079-71dc-4707-bd2c-c9a53d1e332a" message='#["There are $(sizeOf(payload)) racers available for bias challenge"]'/>
-				<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article" />
-				<flow-ref doc:name="questionBatchProcess" doc:id="0b5c53d2-0cac-41a9-aa75-65c11363dff6" name="biasBatchProcess"/>
+				<try doc:name="Try article generation" doc:id="aef62e7b-1fa1-488a-8018-03435b881140">
+					<scorekeeper-system-api:generate-articles doc:name="Generate Articles" doc:id="aef62e7b-1fa1-488a-8018-03435b881139" config-ref="scorekeeperSystemApiConfig" target="article" />
+					<flow-ref doc:name="biasBatchProcess" doc:id="0b5c53d2-0cac-41a9-aa75-65c11363dff6" name="biasBatchProcess"/>
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="Skip batch on article failure" doc:id="aef62e7b-1fa1-488a-8018-03435b881141" type="SCOREKEEPER-SYSTEM-API:INTERNAL_SERVER_ERROR, SCOREKEEPER-SYSTEM-API:TIMEOUT, HTTP:TIMEOUT, HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR">
+							<logger level="ERROR" doc:name="Log article generation failure" doc:id="aef62e7b-1fa1-488a-8018-03435b881142" message='#["Article generation failed: $(error.description). Skipping bias challenge batch for this cycle. Will retry in 5 minutes."]'/>
+						</on-error-continue>
+					</error-handler>
+				</try>
 			</otherwise>
 		</choice>
 	</flow>
